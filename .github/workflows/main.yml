@@ -1,0 +1,50 @@
+# .github/workflows/main.yml
+
+name: Robot Chef - Build and Push App
+
+# 1. When should the robot start?
+on:
+  push:
+    branches: [ "main" ] # Start when code is pushed to the 'main' branch
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest # The robot runs on a virtual computer
+
+    # Secret settings for the robot (uses the secrets we set up in Step 5)
+    env:
+      IMAGE_NAME: ${{ secrets.DOCKER_USERNAME }}/web-app-robot 
+
+    steps:
+      
+      # 1. Get the code from GitHub
+      - name: Get Code
+        uses: actions/checkout@v4
+
+      # 2. Run the practice test (CI step)
+      - name: Run Test 🧪
+        run: npm test
+
+      # 3. Robot logs into the DockerHub Warehouse
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      
+      # 4. Figure out the latest tag (version) number
+      - name: Figure out Image Tag
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest,enable=true # Always tag the latest one
+
+      # 5. Build the digital box and send it to the warehouse!
+      - name: Build and Push Docker Image 📦
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
