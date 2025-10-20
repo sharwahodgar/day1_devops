@@ -5,7 +5,7 @@ const port = 3000;
 
 app.get('/', (req, res) => {
   // This is what the app says when you visit it!
-  res.send('Hello from the Robot Pipeline! This app is ready! 🚀');
+  res.send('Hello from the Robot Pipeline! This app is ready! 🚀✨');
 });
 
 app.listen(port, () => {
